@@ -1,0 +1,15 @@
+*.mp3
+*.wav
+*.m4a
+*.pdf
+section_*_text.txt
+figure_*_text.txt
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

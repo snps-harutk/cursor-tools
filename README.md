@@ -16,7 +16,8 @@ cursor-tools/
 │       ├── EXPLANATION_TEMPLATE.md
 │       └── examples.md
 └── scripts/
-    └── read_aloud.py           # Generic edge-tts text-to-speech script
+    ├── read_aloud.py           # Generic edge-tts text-to-speech script
+    └── count_tokens.py         # Report tiktoken token counts and context-window usage
 ```
 
 ## Skills
@@ -45,6 +46,26 @@ Generic text-to-speech script using [edge-tts](https://pypi.org/project/edge-tts
 pip install edge-tts
 python scripts/read_aloud.py --file input.txt -o output.mp3
 ```
+
+### count_tokens.py
+
+Reports [tiktoken](https://pypi.org/project/tiktoken/) token counts for one or
+more text files, plus the percentage of a context window each file consumes.
+Handy for estimating how much of an LLM prompt budget a chat transcript,
+source file, or spec will eat.
+
+```bash
+pip install tiktoken
+python scripts/count_tokens.py transcript.jsonl
+python scripts/count_tokens.py --all-encodings transcript.jsonl
+python scripts/count_tokens.py *.sv                 # multi-file, with TOTAL
+cat file.txt | python scripts/count_tokens.py -     # read from stdin
+```
+
+By default uses `cl100k_base` (GPT-4 tokenizer), which is a reasonable proxy
+for Claude (typically within ~5%). Use `--encoding o200k_base` for GPT-4o, or
+`--all-encodings` to compare. The assumed context window is 200k tokens;
+override with `--window 1000000` for a 1M-token model.
 
 ## License
 

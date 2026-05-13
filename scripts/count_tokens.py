@@ -43,6 +43,7 @@ except ImportError:
 
 KNOWN_ENCODINGS = ["cl100k_base", "o200k_base", "p50k_base", "r50k_base"]
 DEFAULT_CONTEXT_WINDOW = 200_000
+EXTRA_WINDOWS = [1_000_000]  # additional window sizes always shown alongside the default
 
 
 def count(text: str, encoding_name: str) -> int:
@@ -67,6 +68,7 @@ def report(path: str, text: str, encodings: list, window: int) -> None:
     print(f"\n{label}")
     print(f"  chars: {n_chars:,}    lines: {n_lines:,}")
 
+    all_windows = [window] + [w for w in EXTRA_WINDOWS if w != window]
     for enc_name in encodings:
         try:
             n_tokens = count(text, enc_name)
@@ -74,11 +76,13 @@ def report(path: str, text: str, encodings: list, window: int) -> None:
             print(f"  {enc_name:14s}  ERROR: {exc}")
             continue
         ratio = n_chars / n_tokens if n_tokens else 0.0
-        pct_window = 100.0 * n_tokens / window
+        pct_parts = "   ".join(
+            f"{100.0 * n_tokens / w:5.2f}% of {w // 1000}k" for w in all_windows
+        )
         print(
             f"  {enc_name:14s}  tokens = {n_tokens:>9,}   "
             f"chars/tok = {ratio:5.2f}   "
-            f"= {pct_window:5.2f}% of {window // 1000}k window"
+            f"[ {pct_parts} ]"
         )
 
 
@@ -135,14 +139,17 @@ def main() -> int:
         report(path, text, encodings, args.window)
 
     if n_files_ok > 1:
+        all_windows = [args.window] + [w for w in EXTRA_WINDOWS if w != args.window]
         print("\nTOTAL")
         print(f"  chars: {total_chars:,}")
         for enc_name in encodings:
             n = total_tokens[enc_name]
-            pct = 100.0 * n / args.window
+            pct_parts = "   ".join(
+                f"{100.0 * n / w:5.2f}% of {w // 1000}k" for w in all_windows
+            )
             print(
                 f"  {enc_name:14s}  tokens = {n:>9,}   "
-                f"= {pct:5.2f}% of {args.window // 1000}k window"
+                f"[ {pct_parts} ]"
             )
 
     return 0
